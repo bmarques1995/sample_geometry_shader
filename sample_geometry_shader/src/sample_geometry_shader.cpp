@@ -230,8 +230,42 @@ void D3D11Program()
 				done = true;
 			if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED && event.window.windowID == SDL_GetWindowID(window))
 				done = true;
-			/*if (event.type == SDL_EVENT_WINDOW_RESIZED)
-				glViewport(0, 0, event.window.data1, event.window.data2);*/
+			if (event.type == SDL_EVENT_WINDOW_RESIZED)
+			{
+				renderTargetView->Release();
+				swapChain->ResizeBuffers(0, (UINT)event.window.data1, (UINT)event.window.data2, DXGI_FORMAT_UNKNOWN, 0);
+				
+
+				ID3D11Texture2D* pBackBuffer;
+				swapChain->GetBuffer(0, IID_PPV_ARGS(&pBackBuffer));
+				hr = device->CreateRenderTargetView(pBackBuffer, nullptr, renderTargetView.GetAddressOf());
+				pBackBuffer->Release();
+				assert(hr == S_OK);
+
+				D3D11_TEXTURE2D_DESC depthStencilDesc = {};
+				depthStencilDesc.Width = (UINT)event.window.data1;
+				depthStencilDesc.Height = (UINT)event.window.data2;
+				depthStencilDesc.MipLevels = 1;
+				depthStencilDesc.ArraySize = 1;
+				depthStencilDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+				depthStencilDesc.SampleDesc.Count = 1;
+				depthStencilDesc.SampleDesc.Quality = 0;
+				depthStencilDesc.Usage = D3D11_USAGE_DEFAULT;
+				depthStencilDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+				depthStencilDesc.CPUAccessFlags = 0;
+				depthStencilDesc.MiscFlags = 0;
+
+				hr = device->CreateTexture2D(&depthStencilDesc, nullptr, depthStencilBuffer.GetAddressOf());
+				assert(hr == S_OK);
+
+				D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
+				dsvDesc.Format = depthStencilDesc.Format;
+				dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+				dsvDesc.Texture2D.MipSlice = 0;
+
+				hr = device->CreateDepthStencilView(depthStencilBuffer.Get(), &dsvDesc, &depthStencilView);
+				assert(hr == S_OK);
+			}
 		}
 
 		static float clear_color[4] = { 0.0f, 0.5f, 0.25f, 1.0f };
