@@ -12,7 +12,7 @@ trace_dependency(NAME glad INSTALL_SCRIPT "${PROJECT_SOURCE_DIR}/installers/glad
 trace_dependency(NAME glm INSTALL_SCRIPT "${PROJECT_SOURCE_DIR}/installers/glm.ps1")
 
 add_executable(${TARGET_NAME} ${SAMPLE_HDRS} ${SAMPLE_SRCS})
-target_link_libraries(${TARGET_NAME} PUBLIC SDL3::SDL3 glad::glad glm::glm-header-only)
+target_link_libraries(${TARGET_NAME} PUBLIC SDL3::SDL3 glad::glad glm::glm-header-only d3d11 dxgi dxguid d3dcompiler)
 
 set_cxx_project_standards(${TARGET_NAME} 20 FALSE)
 
